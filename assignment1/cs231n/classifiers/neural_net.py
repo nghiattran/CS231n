@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 class TwoLayerNet(object):
   """
   A two-layer fully-connected neural network. The net has an input dimension of
@@ -74,7 +73,17 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    pass
+    # First layer: a1 = softmax(0, W1 * X + b1)
+    # Second layer: scores = a2 = W2 * a1 + b1
+    #
+    # q1 = W1 * X
+    # q2 = q1 + b1
+    # q3 = max(0, q2)
+    # q4 = W2 * q3
+    # q5 = q4 + b2
+
+    a1 = np.maximum(0, X.dot(W1) + b1)
+    scores = a1.dot(W2) + b2
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -92,7 +101,12 @@ class TwoLayerNet(object):
     # classifier loss. So that your results match ours, multiply the            #
     # regularization loss by 0.5                                                #
     #############################################################################
-    pass
+    expos = np.exp(scores)
+    sums = np.sum(expos, axis=1)
+    probs = expos / sums[:, np.newaxis]
+    loss = -np.sum(np.log(probs[np.arange(N), y]))
+    loss /= N
+    loss += 0.5 * reg * (np.sum(W1**2) + np.sum(W2**2))
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -104,7 +118,11 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
-    pass
+    dscores = probs
+    # print probs
+    dscores[range(N), y] -= 1
+    # print dscores
+    grads['W2'] = np.dot(a1.T, dscores)
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
