@@ -268,20 +268,26 @@ class FullyConnectedNet(object):
     ############################################################################
     # Forward through all hidden layers
     input_vals = X
-    cache = [0] * self.num_layers
+    cache = {}
     for i in xrange(self.num_layers - 1):
       index = repr(i + 1)
       w = self.params['W' + index]
       b = self.params['b' + index]
       if self.use_batchnorm:
+        tag = 'abr' + index
         gamma = self.params['gamma' + index]
         beta = self.params['beta' + index]
         bn_param = self.bn_params[i]
-        out, cache[i] = affine_backnorm_relu_forward(x=input_vals, w=w, b=b,
+        out, cache[tag] = affine_backnorm_relu_forward(x=input_vals, w=w, b=b,
                                                   gamma=gamma, beta=beta,
                                                 bn_param=bn_param)
       else:
-        out, cache[i] = affine_relu_forward(x=input_vals, w=w, b=b)
+        tag = 'ar' + index
+        out, cache[tag] = affine_relu_forward(x=input_vals, w=w, b=b)
+
+      if self.use_dropout:
+        tag = 'dropout' + index
+        out, cache[tag] = dropout_forward(out, self.dropout_param)
 
       input_vals = out
 
@@ -289,7 +295,8 @@ class FullyConnectedNet(object):
     last_layer = str(self.num_layers)
     w = self.params['W' + last_layer]
     b = self.params['b' + last_layer]
-    scores, cache[self.num_layers - 1] = affine_forward(input_vals, w, b)
+    tag = 'affine' + last_layer
+    scores, cache[tag] = affine_forward(input_vals, w, b)
 
     ############################################################################
     #                             END OF YOUR CODE                             #
@@ -325,17 +332,25 @@ class FullyConnectedNet(object):
     # take sum
     loss += reg_loss
 
-    gradient = affine_backward(dout, cache[len(cache) - 1])
+    tag = 'affine' + last_layer
+    gradient = affine_backward(dout, cache[tag])
     dout, grads['W' + last_layer], grads['b' + last_layer] = gradient
     grads['W' + last_layer] += self.reg * self.params['W' + last_layer]
     for i in xrange(self.num_layers - 1, 0, -1):
       index = repr(i)
+
+      if self.use_dropout:
+        tag = 'dropout' + index
+        dout = dropout_backward(dout, cache[tag])
+
       if self.use_batchnorm:
-        gradient = affine_backnorm_relu_backward(dout, cache[i - 1])
+        tag = 'abr' + index
+        gradient = affine_backnorm_relu_backward(dout, cache[tag])
         dout, grads['W' + index], grads['b' + index], _ = gradient
         grads['gamma' + index], grads['beta' + index] = _
       else:
-        gradient = affine_relu_backward(dout, cache[i - 1])
+        tag = 'ar' + index
+        gradient = affine_relu_backward(dout, cache[tag])
         dout, grads['W' + index], grads['b' + index] = gradient
 
 
