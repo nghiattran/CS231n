@@ -1,10 +1,8 @@
 import numpy as np
-
 try:
   from cs231n.im2col_cython import col2im_cython, im2col_cython
   from cs231n.im2col_cython import col2im_6d_cython
-except ImportError as e:
-  print e
+except ImportError:
   print 'run the following from the cs231n directory and try again:'
   print 'python setup.py build_ext --inplace'
   print 'You may also need to restart your iPython kernel'
@@ -47,8 +45,8 @@ def conv_forward_strides(x, w, b, conv_param):
   stride, pad = conv_param['stride'], conv_param['pad']
 
   # Check dimensions
-  assert (W + 2 * pad - WW) % stride == 0, 'width does not work'
-  assert (H + 2 * pad - HH) % stride == 0, 'height does not work'
+  #assert (W + 2 * pad - WW) % stride == 0, 'width does not work'
+  #assert (H + 2 * pad - HH) % stride == 0, 'height does not work'
 
   # Pad the input
   p = pad

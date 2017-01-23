@@ -57,7 +57,7 @@ Hence:
 
 L<sub>i</sub>=−log(e<sup>f<sub>yi</sub></sup> / (∑<sub>j</sub>e<sup>f<sub>j</sub></sup>))
 
-![SVM vs Softmax]('svm-softmax.png')
+![SVM vs Softmax](svm-softmax.png)
 
 ### Optimization strategies
 
@@ -74,3 +74,4 @@ Always use analytic gradient, but check implementation with numerical gradient
 Only use a small portion of the training set to compute the gradient
 
 Common mini-batch sizes are 32/64/128..
+
